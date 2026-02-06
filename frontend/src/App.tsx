@@ -1,12 +1,17 @@
-import React from 'react'; // <--- Añade esto arriba de todo
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { ShopPage } from './pages/ShopPage';
+import ShopPage from './pages/ShopPage';
+import ProductDetail from './pages/ProductDetail';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<ShopPage />} />
-    </Routes>
+    <div className="min-h-screen bg-gray-50">
+      <Routes>
+        <Route path="/" element={<ShopPage />} />
+        <Route path="/product/:id" element={<ProductDetail/>} />
+        
+      </Routes>
+    </div>
   );
 }
 
