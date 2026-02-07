@@ -13,6 +13,15 @@ export default {
           600: '#2563eb',
           700: '#1d4ed8',
         },
+        // Luxury Palette
+        'brand-black': '#1A1A1A',
+        'brand-white': '#FAFAFA',
+        'brand-gold': '#C5A059',
+        'brand-gray': '#F5F5F5',
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
       },
     },
   },

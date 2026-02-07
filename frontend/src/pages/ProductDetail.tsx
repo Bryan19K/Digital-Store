@@ -1,86 +1,117 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-// Importamos los mocks que creamos antes
-import { MOCK_PRODUCTS } from '../mocks/products';
 import { useCartStore } from '../store/useCartStore';
+import { useProductStore } from '../store/useProductStore';
+import { Plus, Minus, Truck, Shield, RotateCcw } from 'lucide-react';
 
 const ProductDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
-    // Buscamos el producto en nuestro array de prueba
-    const product = MOCK_PRODUCTS.find(p => p._id === id);
+    const addToCart = useCartStore((state) => state.addToCart);
+    const { products } = useProductStore();
+
+    // Find product from store instead of mock
+    const product = products.find(p => p._id === id);
 
     if (!product) {
         return (
-            <div className="text-center p-20">
-                <h2 className="text-2xl font-bold">{t('product_not_found')}</h2>
-                <button onClick={() => navigate('/')} className="mt-4 text-blue-500 underline">
-                    {t('back_to_shop')}
+            <div className="min-h-screen flex flex-col justify-center items-center bg-white">
+                <h2 className="text-2xl font-serif mb-4">Product not found</h2>
+                <button
+                    onClick={() => navigate('/shop')}
+                    className="text-sm underline hover:text-brand-gold transition-colors"
+                >
+                    Return to Shop
                 </button>
             </div>
         );
     }
-    const addToCart = useCartStore((state) => state.addToCart);
 
     const handleAddToCart = () => {
         addToCart(product);
-        alert(t('added_to_cart_success') || '¡Producto añadido!');
+        alert(t('added_to_cart_success') || 'Product added to cart');
     };
 
     const isEs = i18n.language.startsWith('es');
 
     return (
-        <div className="bg-white">
-            <div className="pt-6 pb-16 sm:pb-24">
-                <div className="mx-auto mt-8 max-w-2xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-                    <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
-
-                        {/* Galería de Imágenes */}
-                        <div className="flex flex-col-reverse">
-                            <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg">
-                                <img
-                                    src={product.images[0]}
-                                    alt={product.name.en}
-                                    className="h-full w-full object-cover object-center sm:rounded-lg"
-                                />
-                            </div>
+        <div className="bg-white min-h-screen pt-24 pb-12">
+            <div className="container mx-auto px-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
+                    {/* Image Gallery */}
+                    <div className="space-y-4">
+                        <div className="aspect-[3/4] bg-gray-100 overflow-hidden w-full">
+                            <img
+                                src={product.images[0]}
+                                alt={isEs ? product.name.es : product.name.en}
+                                className="w-full h-full object-cover object-center"
+                            />
                         </div>
+                        {/* Thumbnails placeholder */}
+                        <div className="grid grid-cols-4 gap-4">
+                            {product.images.map((img, idx) => (
+                                <div key={idx} className="aspect-square bg-gray-50 cursor-pointer border border-transparent hover:border-black transition-colors">
+                                    <img src={img} className="w-full h-full object-cover" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
-                        {/* Información del Producto */}
-                        <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                    {/* Product Info */}
+                    <div className="flex flex-col pt-4">
+                        <div className="mb-8 border-b border-gray-100 pb-8">
+                            <p className="text-sm text-gray-400 uppercase tracking-widest mb-2">{product.category}</p>
+                            <h1 className="text-4xl font-serif text-brand-black mb-4 leading-tight">
                                 {isEs ? product.name.es : product.name.en}
                             </h1>
-
-                            <div className="mt-3">
-                                <h2 className="sr-only">Product information</h2>
-                                <p className="text-3xl tracking-tight text-blue-600 font-bold">${product.price}</p>
-                            </div>
-
-                            <div className="mt-6">
-                                <h3 className="sr-only">Description</h3>
-                                <div className="space-y-6 text-base text-gray-700">
-                                    {isEs ? product.description.es : product.description.en}
-                                </div>
-                            </div>
-
-                            <div className="mt-10 flex">
-                                <button
-                                    onClick={handleAddToCart} // <--- ¡AQUÍ ESTÁ LA CONEXIÓN!
-                                    className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-black px-8 py-3 text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 sm:w-full"
-                                >
-                                    {t('add_to_cart')}
-                                </button>
-                            </div>
-
-                            <p className="mt-4 text-sm text-gray-500">
-                                {t('stock_available')}: {product.category}
+                            <p className="text-2xl font-medium text-brand-black">
+                                ${product.price.toFixed(2)}
                             </p>
                         </div>
 
+                        <div className="mb-8">
+                            <p className="text-gray-600 leading-relaxed font-light">
+                                {isEs ? product.description.es : product.description.en}
+                            </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="space-y-6 mb-12">
+                            <button
+                                onClick={handleAddToCart}
+                                className="w-full bg-brand-black text-white py-4 uppercase tracking-[0.2em] text-sm font-medium hover:bg-gray-800 transition-colors"
+                            >
+                                {t('add_to_cart')}
+                            </button>
+                        </div>
+
+                        {/* Features */}
+                        <div className="grid grid-cols-1 gap-6 border-t border-gray-100 pt-8">
+                            <div className="flex items-start space-x-4">
+                                <Truck size={20} strokeWidth={1.5} className="text-gray-400 mt-1" />
+                                <div>
+                                    <h4 className="text-xs font-bold uppercase tracking-widest mb-1">Free Shipping</h4>
+                                    <p className="text-xs text-gray-500 font-light">On all orders over $150</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start space-x-4">
+                                <RotateCcw size={20} strokeWidth={1.5} className="text-gray-400 mt-1" />
+                                <div>
+                                    <h4 className="text-xs font-bold uppercase tracking-widest mb-1">Easy Returns</h4>
+                                    <p className="text-xs text-gray-500 font-light">30-day return policy</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start space-x-4">
+                                <Shield size={20} strokeWidth={1.5} className="text-gray-400 mt-1" />
+                                <div>
+                                    <h4 className="text-xs font-bold uppercase tracking-widest mb-1">Secure Payment</h4>
+                                    <p className="text-xs text-gray-500 font-light">Encrypted transaction</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
