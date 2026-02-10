@@ -1,3 +1,5 @@
+import { Category } from "../store/useCategoryStore";
+
 export interface Product {
   _id: string;
   name: {
@@ -10,5 +12,5 @@ export interface Product {
   };
   price: number;
   images: string[];
-  category: string;
+  category: string | Category;
 }

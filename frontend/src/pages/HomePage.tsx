@@ -2,15 +2,21 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProductStore } from '../store/useProductStore';
+import { useCategoryStore } from '../store/useCategoryStore';
 import ProductCard from '../components/ProductCard';
 
 const HomePage: React.FC = () => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { products } = useProductStore();
+    const { categories } = useCategoryStore();
 
     // Featured products
     const featuredProducts = products.slice(0, 4);
+
+    const handleCategoryClick = (slug: string) => {
+        navigate(`/shop?category=${slug}`);
+    };
 
     return (
         <div className="bg-white">
@@ -42,9 +48,29 @@ const HomePage: React.FC = () => {
             {/* Featured Collection - "New Arrivals" */}
             <section className="py-24 md:py-32 bg-white">
                 <div className="container mx-auto px-6">
-                    <div className="flex flex-col items-center mb-16 md:mb-24">
+                    <div className="flex flex-col items-center mb-12">
                         <span className="text-brand-gold uppercase tracking-[0.2em] text-xs font-semibold mb-3">Curated Selection</span>
                         <h2 className="text-3xl md:text-4xl font-serif text-brand-black text-center">New Arrivals</h2>
+                    </div>
+
+                    {/* Category Navigation */}
+                    <div className="flex flex-wrap justify-center gap-4 md:gap-8 mb-16">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat._id}
+                                onClick={() => handleCategoryClick(cat.slug)}
+                                className="group flex flex-col items-center space-y-3"
+                            >
+                                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-brand-gray flex items-center justify-center border border-transparent group-hover:border-brand-gold transition-all duration-300">
+                                    <span className="text-brand-black font-serif text-lg md:text-xl">
+                                        {(i18n.language === 'es' ? cat.name_es : cat.name_en).charAt(0)}
+                                    </span>
+                                </div>
+                                <span className="text-[10px] md:text-xs uppercase tracking-widest font-medium text-gray-500 group-hover:text-brand-black transition-colors">
+                                    {i18n.language === 'es' ? cat.name_es : cat.name_en}
+                                </span>
+                            </button>
+                        ))}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-8">

@@ -1,12 +1,13 @@
 import express from 'express';
 import Product from '../models/Product.js';
+import { protect, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // GET all products
 router.get('/', async (req, res) => {
     try {
-        const products = await Product.find({});
+        const products = await Product.find({}).populate('category');
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -16,7 +17,7 @@ router.get('/', async (req, res) => {
 // GET single product
 router.get('/:id', async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findById(req.params.id).populate('category');
         if (product) {
             res.json(product);
         } else {
@@ -27,8 +28,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST create product (Admin only - simplified for now, middleware later)
-router.post('/', async (req, res) => {
+// POST create product (Admin only)
+router.post('/', protect, isAdmin, async (req, res) => {
     try {
         const product = await Product.create(req.body);
         res.status(201).json(product);
@@ -37,8 +38,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT update product
-router.put('/:id', async (req, res) => {
+// PUT update product (Admin only)
+router.put('/:id', protect, isAdmin, async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (product) {
@@ -53,8 +54,8 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE product
-router.delete('/:id', async (req, res) => {
+// DELETE product (Admin only)
+router.delete('/:id', protect, isAdmin, async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (product) {

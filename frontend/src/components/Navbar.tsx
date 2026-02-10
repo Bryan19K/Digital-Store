@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Search, User, Menu, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../store/useCartStore';
 import { useAuthStore } from '../store/useAuthStore';
+import LanguageSelector from './LanguageSelector';
 
 const Navbar: React.FC = () => {
+    const { t } = useTranslation();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const cart = useCartStore((state) => state.cart);
@@ -16,7 +19,7 @@ const Navbar: React.FC = () => {
     const handleUserClick = () => {
         if (!isAuthenticated) {
             navigate('/login');
-        } else if (user?.role === 'ADMIN') {
+        } else if (user?.role?.toLowerCase() === 'admin') {
             navigate('/admin');
         } else {
             navigate('/account');
@@ -25,7 +28,6 @@ const Navbar: React.FC = () => {
 
     const handleSearchClick = () => {
         navigate('/shop');
-        // Ideally we would focus the search bar in the shop page, but for now redirecting is enough
     };
 
     useEffect(() => {
@@ -40,7 +42,7 @@ const Navbar: React.FC = () => {
         <div className="fixed top-0 left-0 w-full z-50 flex flex-col">
             {/* Top Bar */}
             <div className="bg-brand-black text-white py-1.5 text-center px-4 hidden sm:block">
-                <p className="text-[10px] uppercase tracking-[0.2em] font-medium">Free Shipping on Orders Over $150</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] font-medium">{t('free_shipping')}</p>
             </div>
 
             {/* Main Navbar */}
@@ -65,13 +67,14 @@ const Navbar: React.FC = () => {
                     </Link>
 
                     {/* Desktop Links */}
-                    <div className="hidden md:flex space-x-12">
+                    <div className="hidden md:flex space-x-12 items-center">
                         <Link to="/" className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-500 hover:text-brand-black transition-colors">
-                            Home
+                            {t('nav_home')}
                         </Link>
                         <Link to="/shop" className="text-xs font-semibold uppercase tracking-[0.1em] text-gray-500 hover:text-brand-black transition-colors">
-                            Shop
+                            {t('nav_shop')}
                         </Link>
+                        <LanguageSelector />
                     </div>
 
                     {/* Icons */}
@@ -106,24 +109,27 @@ const Navbar: React.FC = () => {
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
                 <div className="fixed inset-0 bg-white z-40 flex flex-col pt-24 px-8 md:hidden">
-                    <div className="flex flex-col space-y-8 animate-fade-in">
+                    <div className="flex flex-col space-y-8 animate-fade-in text-center items-center">
                         <Link
                             to="/"
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="text-3xl font-serif text-brand-black"
                         >
-                            Home
+                            {t('nav_home')}
                         </Link>
                         <Link
                             to="/shop"
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="text-3xl font-serif text-brand-black"
                         >
-                            Shop
+                            {t('nav_shop')}
                         </Link>
-                        <div className="pt-8 border-t border-gray-100">
+                        <div className="pt-4 pb-2">
+                            <LanguageSelector />
+                        </div>
+                        <div className="pt-8 border-t border-gray-100 w-full">
                             <p className="text-xs text-gray-400 uppercase tracking-widest mb-4">Account</p>
-                            <Link to="/cart" onClick={() => setIsMobileMenuOpen(false)} className="block text-lg text-gray-600 mb-2">My Cart ({totalItems})</Link>
+                            <Link to="/cart" onClick={() => setIsMobileMenuOpen(false)} className="block text-lg text-gray-600 mb-2">{t('nav_cart')} ({totalItems})</Link>
                         </div>
                     </div>
                 </div>

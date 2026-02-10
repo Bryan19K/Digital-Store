@@ -1,33 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Trash2, Plus, Minus, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
-import { useOrderStore } from '../store/useOrderStore';
+import { useAuthStore } from '../store/useAuthStore';
+import api from '../config/axios';
 
 const CartPage: React.FC = () => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { cart, addToCart, removeFromCart, clearCart } = useCartStore();
-    const { addOrder } = useOrderStore();
-    const isEs = i18n.language.startsWith('es');
+    const { user } = useAuthStore();
+    const [isProcessing, setIsProcessing] = useState(false);
+    const isEs = i18n.language?.startsWith('es') || false;
 
     const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const shipping = subtotal > 150 ? 0 : 15;
     const total = subtotal + shipping;
 
-    const handleCheckout = () => {
+    const handleCheckout = async () => {
         if (cart.length === 0) return;
 
-        addOrder({
-            items: cart,
-            total: total,
-            customerName: "Guest User",
-        });
+        setIsProcessing(true);
 
-        clearCart();
-        alert("Transaction Successful! Thank you for your purchase.");
-        navigate('/');
+        try {
+            const response = await api.post(
+                '/checkout/create-session',
+                {
+                    items: cart,
+                    customerEmail: user?.email || 'guest@digitalstore.com',
+                }
+            );
+
+            // Redirect to Stripe Checkout
+            if (response.data.url) {
+                window.location.href = response.data.url;
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+            alert('Failed to process checkout. Please try again.');
+            setIsProcessing(false);
+        }
     };
 
     if (cart.length === 0) {
@@ -59,11 +72,15 @@ const CartPage: React.FC = () => {
                             {cart.map((product) => (
                                 <li key={product._id} className="flex py-6 sm:py-10">
                                     <div className="flex-shrink-0">
-                                        <img
-                                            src={product.images[0]}
-                                            alt={isEs ? product.name.es : product.name.en}
-                                            className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48"
-                                        />
+                                        {product.images?.[0] ? (
+                                            <img
+                                                src={product.images[0]}
+                                                alt={isEs ? (product.name?.es || '') : (product.name?.en || '')}
+                                                className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48"
+                                            />
+                                        ) : (
+                                            <div className="h-24 w-24 rounded-md bg-gray-100 flex items-center justify-center text-xs text-gray-400">No Image</div>
+                                        )}
                                     </div>
 
                                     <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
@@ -72,12 +89,14 @@ const CartPage: React.FC = () => {
                                                 <div className="flex justify-between">
                                                     <h3 className="text-sm">
                                                         <Link to={`/product/${product._id}`} className="font-medium text-gray-700 hover:text-gray-800">
-                                                            {isEs ? product.name.es : product.name.en}
+                                                            {isEs ? (product.name?.es || 'Untitled') : (product.name?.en || 'Untitled')}
                                                         </Link>
                                                     </h3>
                                                 </div>
-                                                <p className="mt-1 text-sm font-medium text-gray-900">${product.price}</p>
-                                                <p className="mt-1 text-sm text-gray-500">{product.category}</p>
+                                                <p className="mt-1 text-sm font-medium text-gray-900">${product.price || '0.00'}</p>
+                                                <p className="mt-1 text-sm text-gray-500">
+                                                    {typeof product.category === 'string' ? product.category : (isEs ? product.category?.name_es : product.category?.name_en)}
+                                                </p>
                                             </div>
 
                                             <div className="mt-4 sm:mt-0 sm:pr-9">
@@ -167,11 +186,21 @@ const CartPage: React.FC = () => {
                         <div className="mt-6">
                             <button
                                 type="button"
-                                className="w-full rounded-md border border-transparent bg-black px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-50 transition-colors flex justify-center items-center space-x-2"
+                                className="w-full rounded-md border border-transparent bg-black px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-50 transition-colors flex justify-center items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 onClick={handleCheckout}
+                                disabled={isProcessing}
                             >
-                                <span>Checkout</span>
-                                <ArrowRight size={16} />
+                                {isProcessing ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                        <span>Processing...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Proceed to Checkout</span>
+                                        <ArrowRight size={16} />
+                                    </>
+                                )}
                             </button>
                         </div>
 

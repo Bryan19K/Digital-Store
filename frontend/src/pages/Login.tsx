@@ -21,7 +21,7 @@ const Login: React.FC = () => {
             // Since await finished, the store should be updated.
             const currentUser = useAuthStore.getState().user;
 
-            if (currentUser?.role === 'ADMIN') {
+            if (currentUser?.role?.toLowerCase() === 'admin') {
                 navigate('/admin');
             } else {
                 navigate('/account');

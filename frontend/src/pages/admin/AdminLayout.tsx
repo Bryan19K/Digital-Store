@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Tag } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
 const AdminLayout: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const logout = useAuthStore((state) => state.logout);
+    const user = useAuthStore((s) => s.user);
+    const logout = useAuthStore((s) => s.logout);
 
     const handleLogout = () => {
         logout();
@@ -15,11 +16,16 @@ const AdminLayout: React.FC = () => {
 
     const isActive = (path: string) => location.pathname === path;
 
+    const isAdmin = user?.role?.trim().toLowerCase() === 'admin';
+
     const navItems = [
-        { name: 'Overview', path: '/admin', icon: LayoutDashboard },
-        { name: 'Products', path: '/admin/products', icon: Package },
-        { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
+        { name: 'Overview', path: '/admin', icon: LayoutDashboard, show: isAdmin },
+        { name: 'Products', path: '/admin/products', icon: Package, show: isAdmin },
+        { name: 'Categories', path: '/admin/categories', icon: Tag, show: isAdmin },
+        { name: 'Orders', path: '/admin/orders', icon: ShoppingCart, show: true },
     ];
+
+    const filteredNavItems = navItems.filter(item => item.show);
 
     return (
         <div className="flex min-h-screen bg-gray-50 font-sans">
@@ -33,7 +39,7 @@ const AdminLayout: React.FC = () => {
                 </div>
 
                 <nav className="flex-1 p-6 space-y-2">
-                    {navItems.map((item) => (
+                    {filteredNavItems.map((item) => (
                         <Link
                             key={item.path}
                             to={item.path}

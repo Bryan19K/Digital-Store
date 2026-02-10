@@ -1,26 +1,41 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProductStore } from '../store/useProductStore';
+import { useCategoryStore } from '../store/useCategoryStore';
 import ProductCard from '../components/ProductCard';
 import { Search, Filter } from 'lucide-react';
 
 const ShopPage: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get('category') || 'All';
+
   const { products, fetchProducts } = useProductStore();
+  const { categories: categoryList, fetchCategories } = useCategoryStore();
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
   React.useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
-  const categories = ["All", ...Array.from(new Set(products.map(p => p.category)))];
+  const categories = ["All", ...categoryList.map(c => c.slug)];
 
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.name.es.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
+    const productNameEn = product.name?.en || '';
+    const productNameEs = product.name?.es || '';
+
+    const matchesSearch = productNameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      productNameEs.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const productCategorySlug = typeof product.category === 'string'
+      ? product.category
+      : product.category?.slug;
+
+    const matchesCategory = selectedCategory === "All" || productCategorySlug === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -48,8 +63,11 @@ const ShopPage: React.FC = () => {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
+              <option value="All">All Categories</option>
+              {categoryList.map(category => (
+                <option key={category._id} value={category.slug}>
+                  {i18n.language === 'es' ? category.name_es : category.name_en}
+                </option>
               ))}
             </select>
           </div>

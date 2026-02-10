@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProductStore } from '../../store/useProductStore';
+import { useCategoryStore } from '../../store/useCategoryStore';
 import { ArrowLeft, Save } from 'lucide-react';
 
 const AddProduct: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const { addProduct, updateProduct, products } = useProductStore();
+    const { categories, fetchCategories } = useCategoryStore();
     const isEditMode = Boolean(id);
 
     const [formData, setFormData] = useState({
@@ -22,6 +24,7 @@ const AddProduct: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        fetchCategories();
         if (isEditMode && id) {
             const productToEdit = products.find(p => p._id === id);
             if (productToEdit) {
@@ -29,7 +32,9 @@ const AddProduct: React.FC = () => {
                     nameEn: productToEdit.name.en,
                     nameEs: productToEdit.name.es,
                     price: productToEdit.price.toString(),
-                    category: productToEdit.category,
+                    category: typeof productToEdit.category === 'string'
+                        ? productToEdit.category
+                        : productToEdit.category?._id || '',
                     descriptionEn: productToEdit.description.en,
                     descriptionEs: productToEdit.description.es,
                     imageUrl: productToEdit.images[0] || '',
@@ -38,7 +43,7 @@ const AddProduct: React.FC = () => {
                 navigate('/admin'); // Product not found
             }
         }
-    }, [id, isEditMode, products, navigate]);
+    }, [id, isEditMode, products, navigate, fetchCategories]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -144,10 +149,11 @@ const AddProduct: React.FC = () => {
                             className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-brand-black bg-white transition-colors"
                         >
                             <option value="">Select Category</option>
-                            <option value="Clothing">Clothing</option>
-                            <option value="Accessories">Accessories</option>
-                            <option value="Bags">Bags</option>
-                            <option value="Shoes">Shoes</option>
+                            {categories.map((cat) => (
+                                <option key={cat._id} value={cat._id}>
+                                    {cat.name_en} / {cat.name_es}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>

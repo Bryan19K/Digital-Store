@@ -16,9 +16,8 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Check if this is the FIRST user (to make them Admin)
         const isFirstAccount = (await User.countDocuments({})) === 0;
-        const role = isFirstAccount ? 'ADMIN' : 'CUSTOMER';
+        const role = isFirstAccount ? 'admin' : 'user';
 
         // Hash password
         const salt = await bcrypt.genSalt(10);

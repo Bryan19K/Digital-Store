@@ -24,11 +24,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {/* Image Container */}
             <Link to={`/product/${product._id}`} className="block relative aspect-[3/4] overflow-hidden bg-gray-100">
                 <img
-                    src={product.images[0]}
-                    alt={isEs ? product.name.es : product.name.en}
+                    src={product.images?.[0] || ''}
+                    alt={isEs ? (product.name?.es || '') : (product.name?.en || '')}
                     className={`h-full w-full object-cover object-center transition-transform duration-700 ease-in-out ${isHovered ? 'scale-110' : 'scale-100'
                         }`}
                 />
+
+                {/* Category Badge */}
+                {product.category && typeof product.category !== 'string' && (
+                    <div className="absolute top-4 left-4 z-10">
+                        <span
+                            className="px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-white"
+                            style={{ backgroundColor: product.category.color }}
+                        >
+                            {isEs ? product.category.name_es : product.category.name_en}
+                        </span>
+                    </div>
+                )}
 
                 {/* Secondary Image Overlay (Optional: if product has 2nd image) */}
                 {/* 
@@ -61,11 +73,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <div className="mt-4 flex flex-col items-start space-y-1">
                 <h3 className="text-sm font-semibold text-brand-black tracking-wide">
                     <Link to={`/product/${product._id}`}>
-                        {isEs ? product.name.es : product.name.en}
+                        {isEs ? (product.name?.es || 'Untitled') : (product.name?.en || 'Untitled')}
                     </Link>
                 </h3>
                 <p className="text-sm text-gray-500 font-light">
-                    ${product.price.toFixed(2)}
+                    ${product.price?.toFixed(2) || '0.00'}
                 </p>
             </div>
         </div>

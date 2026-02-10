@@ -1,20 +1,32 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Trash2, Edit, Plus } from 'lucide-react';
 import { useProductStore } from '../../store/useProductStore';
 import { useOrderStore } from '../../store/useOrderStore';
 
 const AdminDashboard: React.FC = () => {
-    const { products, deleteProduct } = useProductStore();
-    const { orders } = useOrderStore();
+    const { products, deleteProduct, fetchProducts } = useProductStore();
+    const { orders, fetchOrders } = useOrderStore();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const categoryFilter = searchParams.get('category');
     const { i18n } = useTranslation();
     const isEs = i18n.language.startsWith('es');
+
+    // Fetch products and orders from backend on component mount
+    React.useEffect(() => {
+        fetchProducts();
+        fetchOrders();
+    }, [fetchProducts, fetchOrders]);
 
     // Stats
     const totalSales = orders.reduce((acc, order) => acc + order.total, 0);
     const newOrdersCount = orders.filter(o => o.status === 'Pending').length;
+
+    const filteredProducts = categoryFilter
+        ? products.filter(p => (typeof p.category === 'string' ? p.category === categoryFilter : p.category?.slug === categoryFilter))
+        : products;
 
     const stats = [
         { label: 'Total Sales', value: `$${totalSales.toFixed(2)}` },
@@ -51,7 +63,22 @@ const AdminDashboard: React.FC = () => {
 
             {/* Product Table */}
             <div>
-                <h2 className="text-xl font-serif font-bold text-brand-black mb-6">Product Management</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-serif font-bold text-brand-black">Product Management</h2>
+                    {categoryFilter && (
+                        <div className="flex items-center space-x-4">
+                            <span className="text-sm text-gray-500">
+                                Filtering by: <span className="font-bold text-brand-black uppercase tracking-wider">{categoryFilter}</span>
+                            </span>
+                            <button
+                                onClick={() => setSearchParams({})}
+                                className="text-brand-gold hover:text-brand-black text-xs font-medium uppercase tracking-widest border-b border-brand-gold hover:border-brand-black transition-all"
+                            >
+                                Clear Filter
+                            </button>
+                        </div>
+                    )}
+                </div>
                 <div className="overflow-x-auto bg-white border border-gray-100 shadow-sm">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -63,7 +90,7 @@ const AdminDashboard: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {products.map((product) => (
+                            {filteredProducts.map((product) => (
                                 <tr key={product._id} className="hover:bg-gray-50 transition-colors">
                                     <td className="p-4 flex items-center space-x-4">
                                         <div className="h-12 w-12 bg-gray-100 overflow-hidden rounded-sm">
@@ -77,7 +104,20 @@ const AdminDashboard: React.FC = () => {
                                             {isEs ? product.name.es : product.name.en}
                                         </span>
                                     </td>
-                                    <td className="p-4 text-sm text-gray-500">{product.category}</td>
+                                    <td className="p-4 text-sm">
+                                        {product.category && typeof product.category !== 'string' ? (
+                                            <span
+                                                className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
+                                                style={{ backgroundColor: product.category.color }}
+                                            >
+                                                {isEs ? product.category.name_es : product.category.name_en}
+                                            </span>
+                                        ) : (
+                                            <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-400">
+                                                Uncategorized
+                                            </span>
+                                        )}
+                                    </td>
                                     <td className="p-4 text-sm font-medium text-brand-black">${product.price}</td>
                                     <td className="p-4 text-right space-x-2">
                                         <button

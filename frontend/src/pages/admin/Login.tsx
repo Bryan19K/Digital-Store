@@ -17,7 +17,7 @@ const Login: React.FC = () => {
         const success = await login(username, password);
         if (success) {
             const currentUser = useAuthStore.getState().user;
-            if (currentUser?.role === 'ADMIN') {
+            if (currentUser?.role?.toLowerCase() === 'admin') {
                 navigate('/admin');
             } else {
                 setError('Access denied. Admin privileges required.');
