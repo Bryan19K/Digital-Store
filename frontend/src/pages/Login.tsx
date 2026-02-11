@@ -24,7 +24,7 @@ const Login: React.FC = () => {
             if (currentUser?.role?.toLowerCase() === 'admin') {
                 navigate('/admin');
             } else {
-                navigate('/account');
+                navigate('/profile');
             }
         } else {
             setError('Invalid credentials');

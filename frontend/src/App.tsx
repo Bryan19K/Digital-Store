@@ -41,7 +41,7 @@ function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/account" element={<MyAccount />} />
+          <Route path="/profile" element={<MyAccount />} />
           <Route path="/success" element={<SuccessPage />} />
 
           {/* Admin Routes */}

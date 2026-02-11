@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
         } else if (user?.role?.toLowerCase() === 'admin') {
             navigate('/admin');
         } else {
-            navigate('/account');
+            navigate('/profile');
         }
     };
 
@@ -87,7 +87,7 @@ const Navbar: React.FC = () => {
                         </button>
                         <button
                             onClick={handleUserClick}
-                            className="text-brand-black hover:text-brand-gold transition-colors hidden sm:block"
+                            className="text-brand-black hover:text-brand-gold transition-colors"
                         >
                             <User size={18} strokeWidth={1.5} />
                         </button>

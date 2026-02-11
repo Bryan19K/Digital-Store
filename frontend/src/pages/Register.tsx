@@ -23,7 +23,7 @@ const Register: React.FC = () => {
         try {
             const success = await register(name, email, password);
             if (success) {
-                navigate('/account');
+                navigate('/profile');
             } else {
                 // The store handles the error logging but returns boolean. 
                 // We should probably allow the store to return the error message or handle it here.
