@@ -8,12 +8,12 @@ router.post('/', async (req, res) => {
     try {
         const { items, total, customerName, user } = req.body;
 
-        // Ensure connection to user if provided
+        
         const orderData = {
             items,
             total,
             customerName,
-            user: user ? user.id : null // Expecting user object or id
+            user: user ? user.id : null 
         };
 
         const order = await Order.create(orderData);
@@ -33,12 +33,9 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET user orders (Simple filter by name for now to match current frontend logic, ideal is ID)
+
 router.get('/my-orders', async (req, res) => {
-    // Ideally we extract user from token. For migration speed, let's accept a query param or handle in frontend filtering for now?
-    // Proper way: Middleware extracts user. 
-    // Let's implement full GET and let frontend filter for Prototype phase to speed up, 
-    // OR just return all and let Admin see all. Custom user fetching needs middleware.
+    
     try {
         const orders = await Order.find({}).sort({ date: -1 });
         res.json(orders);
@@ -47,7 +44,7 @@ router.get('/my-orders', async (req, res) => {
     }
 });
 
-// PUT update order status
+
 router.put('/:id/status', async (req, res) => {
     try {
         const { status } = req.body;

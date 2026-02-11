@@ -4,7 +4,7 @@ import { protect, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// GET all categories
+
 router.get('/', async (req, res) => {
     try {
         const categories = await Category.find({});

@@ -73,7 +73,7 @@ export const useAuthStore = create<AuthState>()(
             storage: createJSONStorage(() => localStorage),
             onRehydrateStorage: () => {
                 return (state, error) => {
-                    // Use the action to call set() — this triggers a proper React re-render
+                  
                     if (state) {
                         if (state.user?.role) {
                             state.user.role = (state.user.role as string).trim().toLowerCase() as UserRole;

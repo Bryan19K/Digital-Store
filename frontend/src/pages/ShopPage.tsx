@@ -44,7 +44,7 @@ const ShopPage: React.FC = () => {
       <div className="container mx-auto px-6 mb-12">
         <h1 className="text-4xl font-serif text-brand-black mb-8">{t('shop_title')}</h1>
 
-        {/* Filters */}
+       
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-grow max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -74,7 +74,7 @@ const ShopPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Product Grid */}
+      
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 xl:gap-x-8">
           {filteredProducts.map((product) => (

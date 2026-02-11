@@ -34,7 +34,7 @@ async function seed() {
         await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
         console.log('Connected to MongoDB');
 
-        // 1. Create Categories
+        
         const createdCategories = [];
         for (const cat of categories) {
             const existing = await Category.findOne({ slug: cat.slug });
@@ -52,7 +52,7 @@ async function seed() {
             }
         }
 
-        // 2. Reassign Products
+   
         const products = await Product.find({});
         console.log(`Found ${products.length} products to check`);
 

@@ -9,7 +9,7 @@ const SuccessPage: React.FC = () => {
     const { clearCart } = useCartStore();
 
     useEffect(() => {
-        // Clear cart on successful payment
+
         clearCart();
     }, [clearCart]);
 

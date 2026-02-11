@@ -17,8 +17,7 @@ const Login: React.FC = () => {
 
         const success = await login(email, password);
         if (success) {
-            // We need to check the updated state. 
-            // Since await finished, the store should be updated.
+           
             const currentUser = useAuthStore.getState().user;
 
             if (currentUser?.role?.toLowerCase() === 'admin') {

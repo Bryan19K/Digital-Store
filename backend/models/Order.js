@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 const orderSchema = new mongoose.Schema({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Optional for guests? For now let's say optional or store name
-    customerName: { type: String, required: true }, // For Guests or verified users
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
+    customerName: { type: String, required: true }, 
     items: [{
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
         name: {

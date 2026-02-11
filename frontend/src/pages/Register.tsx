@@ -25,9 +25,7 @@ const Register: React.FC = () => {
             if (success) {
                 navigate('/profile');
             } else {
-                // The store handles the error logging but returns boolean. 
-                // We should probably allow the store to return the error message or handle it here.
-                // For now, let's just say "Registration failed" and ask user to check console.
+
                 setError('Registration failed. Please check the console (F12) for details.');
             }
         } catch (err: any) {

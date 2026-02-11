@@ -4,7 +4,7 @@ import { Resend } from 'resend';
 
 const router = express.Router();
 
-// Helper to get Stripe instance
+
 const getStripe = () => {
     if (!process.env.STRIPE_SECRET_KEY) {
         throw new Error('STRIPE_SECRET_KEY is not defined in .env');
@@ -12,13 +12,13 @@ const getStripe = () => {
     return new Stripe(process.env.STRIPE_SECRET_KEY);
 };
 
-// Initialize Resend only if API key is provided
+
 let resend = null;
 if (process.env.RESEND_API_KEY && !process.env.RESEND_API_KEY.includes('YOUR_RESEND_KEY_HERE')) {
     resend = new Resend(process.env.RESEND_API_KEY);
 }
 
-// Create Stripe Checkout Session
+
 router.post('/create-session', async (req, res) => {
     try {
         const stripe = getStripe();
@@ -28,7 +28,6 @@ router.post('/create-session', async (req, res) => {
             return res.status(400).json({ message: 'Cart is empty' });
         }
 
-        // Transform cart items to Stripe line items
         const lineItems = items.map(item => ({
             price_data: {
                 currency: 'usd',
@@ -42,7 +41,7 @@ router.post('/create-session', async (req, res) => {
             quantity: item.quantity,
         }));
 
-        // Create Stripe Checkout Session
+        
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: lineItems,
@@ -62,7 +61,7 @@ router.post('/create-session', async (req, res) => {
     }
 });
 
-// Webhook to handle successful payments and send confirmation email
+
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
     const stripe = getStripe();
     const sig = req.headers['stripe-signature'];
@@ -77,16 +76,16 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the checkout.session.completed event
+    
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
         const customerEmail = session.customer_email || session.metadata.customerEmail;
 
-        // Send confirmation email (only if Resend is configured)
+        
         if (resend) {
             try {
                 await resend.emails.send({
-                    from: 'Digital Store <onboarding@resend.dev>', // Replace with your verified domain
+                    from: 'Digital Store <onboarding@resend.dev>', 
                     to: customerEmail,
                     subject: 'Order Confirmation - Digital Store',
                     html: `

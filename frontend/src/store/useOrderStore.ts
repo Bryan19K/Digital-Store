@@ -4,12 +4,12 @@ import { Product } from '../types/Product';
 
 export interface OrderItem extends Product {
     quantity: number;
-    productId: string; // Ensure we map _id or productId
+    productId: string; 
 }
 
 export interface Order {
-    _id: string; // MongoDB
-    id?: string; // alias if needed
+    _id: string; 
+    id?: string; 
     date: string;
     items: OrderItem[];
     total: number;
@@ -61,7 +61,7 @@ export const useOrderStore = create<OrderState>((set) => ({
     updateOrderStatus: async (id, status) => {
         set({ loading: true });
         try {
-            // We need to implement this route in backend
+            
             const response = await api.put(`/orders/${id}/status`, { status });
             set(state => ({
                 orders: state.orders.map(o => o._id === id ? response.data : o),

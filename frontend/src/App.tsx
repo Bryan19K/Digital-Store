@@ -22,10 +22,7 @@ function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-  // Helper to determine if we are on a page that needs specific layout adjustments?
-  // For now, standard layout is fine.
-
-  // Use a useEffect to scroll to top on route change
+ 
   React.useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);

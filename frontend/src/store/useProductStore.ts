@@ -7,13 +7,13 @@ interface ProductState {
     loading: boolean;
     error: string | null;
     fetchProducts: () => Promise<void>;
-    addProduct: (product: FormData) => Promise<boolean>; // Use FormData for file upload if needed, or JSON
+    addProduct: (product: FormData) => Promise<boolean>; 
     updateProduct: (id: string, product: Partial<Product>) => Promise<boolean>;
     deleteProduct: (id: string) => Promise<boolean>;
 }
 
 export const useProductStore = create<ProductState>((set, get) => ({
-    products: [], // Start empty
+    products: [], 
     loading: false,
     error: null,
 
@@ -31,9 +31,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     addProduct: async (productData) => {
         set({ loading: true });
         try {
-            // Check if productData is FormData or Object. For now assuming Object as per previous impl
-            // But if we want image upload later we need FormData.
-            // keeping it JSON for migration of current simple structure
+            
             const response = await api.post('/products', productData);
             set(state => ({
                 products: [...state.products, response.data],

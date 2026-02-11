@@ -59,7 +59,7 @@ const ProductDetail: React.FC = () => {
         <div className="bg-white min-h-screen pt-24 pb-12">
             <div className="container mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
-                    {/* Image Gallery */}
+                  
                     <div className="space-y-4">
                         <div className="aspect-[3/4] bg-gray-100 overflow-hidden w-full">
                             {product.images && product.images.length > 0 ? (
@@ -72,7 +72,7 @@ const ProductDetail: React.FC = () => {
                                 <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
                             )}
                         </div>
-                        {/* Thumbnails placeholder */}
+                        
                         <div className="grid grid-cols-4 gap-4">
                             {product.images?.map((img, idx) => (
                                 <div key={idx} className="aspect-square bg-gray-50 cursor-pointer border border-transparent hover:border-black transition-colors">
@@ -82,7 +82,7 @@ const ProductDetail: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Product Info */}
+                   
                     <div className="flex flex-col pt-4">
                         <div className="mb-8 border-b border-gray-100 pb-8">
                             <p className="text-sm text-gray-400 uppercase tracking-widest mb-2">
@@ -112,7 +112,7 @@ const ProductDetail: React.FC = () => {
                             </button>
                         </div>
 
-                        {/* Features */}
+                        
                         <div className="grid grid-cols-1 gap-6 border-t border-gray-100 pt-8">
                             <div className="flex items-start space-x-4">
                                 <Truck size={20} strokeWidth={1.5} className="text-gray-400 mt-1" />

@@ -9,22 +9,9 @@ const MyAccount: React.FC = () => {
     const { orders } = useOrderStore();
     const navigate = useNavigate();
 
-    // Filter orders for the current user (mock implementation: assuming we stored user ID/Name in order, but we stored 'customerName' as string. 
-    // In a real app we'd filter by user.id. For now, let's show all orders for demo or filter if 'customerName' matches user.name.
-    // Given the previous implementation of useOrderStore didn't explicitly link to auth user ID, 
-    // and CartPage just put "Guest User", we will see "Guest User" orders. 
-    // Let's assume for this "My Account" we just show all "Guest User" orders if we are logged in, or we should update CartPage to use the logged in name.
-    // UPDATE: I will do the latter in a later step or just show all for now to ensure data is visible as requested "filtrando solo las suyas". 
-    // Let's filter by name for now since we don't have ID in order yet. 
-    // Correction: I should update CartPage logic too, but first let's build this page.
-
-    // Simplification for prototype: Show all orders that are NOT "Guest User" if the user has a name, or matches name.
-    // Actually, to make it work 'perfectly', I should update CartPage to use the auth name.
+   
 
     const myOrders = orders.filter(o => o.customerName === user?.name || o.customerName === "Guest User");
-    // showing Guest User orders too so the user sees something if they just registered but bought as guest? 
-    // No, standard is only show their own. But for the demo flow "Register -> Buy -> See Order", 
-    // I should ensure future orders use the name.
 
     const handleLogout = () => {
         logout();
