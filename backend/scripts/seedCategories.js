@@ -1,9 +1,24 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import Product from './models/Product.js';
-import Category from './models/Category.js';
-
 dotenv.config();
+
+const categorySchema = new mongoose.Schema({
+    name_es: { type: String, required: true },
+    name_en: { type: String, required: true },
+    slug: { type: String, required: true, unique: true },
+    color: { type: String, default: '#808080' }
+}, { timestamps: true });
+
+const productSchema = new mongoose.Schema({
+    name: {
+        en: { type: String, required: true },
+        es: { type: String, required: true }
+    },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+}, { timestamps: true, strict: false });
+
+const Category = mongoose.models.Category || mongoose.model('Category', categorySchema);
+const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 
 const categories = [
     { name_es: 'Ropa', name_en: 'Clothing', slug: 'clothing', color: '#3b82f6' },
@@ -16,7 +31,7 @@ const categories = [
 
 async function seed() {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
         console.log('Connected to MongoDB');
 
         // 1. Create Categories
