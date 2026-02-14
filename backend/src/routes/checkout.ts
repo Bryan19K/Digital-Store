@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { Resend } from 'resend';
 
@@ -13,13 +13,13 @@ const getStripe = () => {
 };
 
 
-let resend = null;
+let resend: Resend | null = null;
 if (process.env.RESEND_API_KEY && !process.env.RESEND_API_KEY.includes('YOUR_RESEND_KEY_HERE')) {
     resend = new Resend(process.env.RESEND_API_KEY);
 }
 
 
-router.post('/create-session', async (req, res) => {
+router.post('/create-session', async (req: Request, res: Response) => {
     try {
         const stripe = getStripe();
         const { items, customerEmail } = req.body;
@@ -28,7 +28,7 @@ router.post('/create-session', async (req, res) => {
             return res.status(400).json({ message: 'Cart is empty' });
         }
 
-        const lineItems = items.map(item => ({
+        const lineItems = items.map((item: any) => ({
             price_data: {
                 currency: 'usd',
                 product_data: {
@@ -41,7 +41,7 @@ router.post('/create-session', async (req, res) => {
             quantity: item.quantity,
         }));
 
-        
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: lineItems,
@@ -55,14 +55,14 @@ router.post('/create-session', async (req, res) => {
         });
 
         res.json({ sessionId: session.id, url: session.url });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Stripe session creation error:', error);
         res.status(500).json({ message: 'Failed to create checkout session', error: error.message });
     }
 });
 
 
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+router.post('/webhook', express.raw({ type: 'application/json' }), async (req: Request, res: Response) => {
     const stripe = getStripe();
     const sig = req.headers['stripe-signature'];
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -70,29 +70,30 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     let event;
 
     try {
+        if (!sig || !webhookSecret) throw new Error('Missing stripe signature or webhook secret');
         event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-    } catch (err) {
+    } catch (err: any) {
         console.error('Webhook signature verification failed:', err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    
-    if (event.type === 'checkout.session.completed') {
-        const session = event.data.object;
-        const customerEmail = session.customer_email || session.metadata.customerEmail;
 
-        
-        if (resend) {
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const customerEmail = session.customer_email || session.metadata?.customerEmail;
+
+
+        if (resend && customerEmail) {
             try {
                 await resend.emails.send({
-                    from: 'Digital Store <onboarding@resend.dev>', 
+                    from: 'Digital Store <onboarding@resend.dev>',
                     to: customerEmail,
                     subject: 'Order Confirmation - Digital Store',
                     html: `
                         <h1>Thank you for your purchase!</h1>
                         <p>Your order has been confirmed and is being processed.</p>
                         <p>Order ID: ${session.id}</p>
-                        <p>Total: $${(session.amount_total / 100).toFixed(2)}</p>
+                        <p>Total: $${(session.amount_total ? session.amount_total / 100 : 0).toFixed(2)}</p>
                         <p>We'll send you another email when your order ships.</p>
                     `,
                 });

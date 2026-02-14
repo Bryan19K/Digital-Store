@@ -1,12 +1,12 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import User from '../models/User';
 
 const router = express.Router();
 
 // REGISTER
-router.post('/register', async (req, res) => {
+router.post('/register', async (req: Request, res: Response) => {
     try {
         const { name, email, password } = req.body;
 
@@ -34,7 +34,7 @@ router.post('/register', async (req, res) => {
         // Generate Token
         const token = jwt.sign(
             { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET!,
             { expiresIn: '30d' }
         );
 
@@ -45,13 +45,13 @@ router.post('/register', async (req, res) => {
             role: user.role,
             token
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
 // LOGIN
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
 
@@ -70,7 +70,7 @@ router.post('/login', async (req, res) => {
         // Generate Token
         const token = jwt.sign(
             { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET!,
             { expiresIn: '30d' }
         );
 
@@ -81,7 +81,7 @@ router.post('/login', async (req, res) => {
             role: user.role,
             token
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ message: 'Server error' });
     }
 });

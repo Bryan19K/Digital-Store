@@ -2,11 +2,11 @@ import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import authRoutes from './routes/auth.js';
-import productRoutes from './routes/products.js';
-import categoryRoutes from './routes/categories.js';
-import orderRoutes from './routes/orders.js';
-import checkoutRoutes from './routes/checkout.js';
+import authRoutes from './routes/auth';
+import productRoutes from './routes/products';
+import categoryRoutes from './routes/categories';
+import orderRoutes from './routes/orders';
+import checkoutRoutes from './routes/checkout';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,8 +17,18 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use(express.static('public'));
 
+// Extend Express Request interface
+declare global {
+  namespace Express {
+    interface Request {
+      language?: string;
+      user?: any;
+    }
+  }
+}
+
 // Language Middleware
-app.use((req, res, next) => {
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
   const lang = req.headers['accept-language'] || 'es';
   req.language = lang.startsWith('en') ? 'en' : 'es';
   next();
@@ -35,7 +45,7 @@ console.log('Attempting to connect to MongoDB Atlas...');
 console.log('URI:', process.env.MONGO_URI ? 'Defined' : 'Undefined');
 
 // Database Connection
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI!)
   .then(() => {
     console.log('Connected to MongoDB Atlas');
     app.listen(PORT, () => {

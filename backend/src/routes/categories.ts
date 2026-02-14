@@ -1,11 +1,11 @@
-import express from 'express';
-import Category from '../models/Category.js';
-import { protect, isAdmin } from '../middleware/auth.js';
+import express, { Request, Response } from 'express';
+import Category from '../models/Category';
+import { protect, isAdmin } from '../middleware/auth';
 
 const router = express.Router();
 
 
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
     try {
         const categories = await Category.find({});
         res.json(categories);
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 // CREATE category (Admin only)
-router.post('/', protect, isAdmin, async (req, res) => {
+router.post('/', protect, isAdmin, async (req: Request, res: Response) => {
     try {
         const { name_es, name_en, slug } = req.body;
         const categoryExists = await Category.findOne({ slug });
@@ -26,13 +26,13 @@ router.post('/', protect, isAdmin, async (req, res) => {
 
         const category = await Category.create({ name_es, name_en, slug });
         res.status(201).json(category);
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ message: 'Server error' });
     }
 });
 
 // UPDATE category (Admin only)
-router.put('/:id', protect, isAdmin, async (req, res) => {
+router.put('/:id', protect, isAdmin, async (req: Request, res: Response) => {
     try {
         const { name_es, name_en, slug } = req.body;
         const category = await Category.findById(req.params.id);
@@ -47,13 +47,13 @@ router.put('/:id', protect, isAdmin, async (req, res) => {
         } else {
             res.status(404).json({ message: 'Category not found' });
         }
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ message: 'Server error' });
     }
 });
 
 // DELETE category (Admin only)
-router.delete('/:id', protect, isAdmin, async (req, res) => {
+router.delete('/:id', protect, isAdmin, async (req: Request, res: Response) => {
     try {
         const category = await Category.findById(req.params.id);
         if (category) {

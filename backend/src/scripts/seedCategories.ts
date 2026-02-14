@@ -31,10 +31,10 @@ const categories = [
 
 async function seed() {
     try {
-        await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI!);
         console.log('Connected to MongoDB');
 
-        
+
         const createdCategories = [];
         for (const cat of categories) {
             const existing = await Category.findOne({ slug: cat.slug });
@@ -52,7 +52,7 @@ async function seed() {
             }
         }
 
-   
+
         const products = await Product.find({});
         console.log(`Found ${products.length} products to check`);
 

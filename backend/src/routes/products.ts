@@ -1,21 +1,21 @@
-import express from 'express';
-import Product from '../models/Product.js';
-import { protect, isAdmin } from '../middleware/auth.js';
+import express, { Request, Response } from 'express';
+import Product from '../models/Product';
+import { protect, isAdmin } from '../middleware/auth';
 
 const router = express.Router();
 
 // GET all products
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
     try {
         const products = await Product.find({}).populate('category');
         res.json(products);
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
 });
 
 // GET single product
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
     try {
         const product = await Product.findById(req.params.id).populate('category');
         if (product) {
@@ -23,23 +23,23 @@ router.get('/:id', async (req, res) => {
         } else {
             res.status(404).json({ message: 'Product not found' });
         }
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
 });
 
 // POST create product (Admin only)
-router.post('/', protect, isAdmin, async (req, res) => {
+router.post('/', protect, isAdmin, async (req: Request, res: Response) => {
     try {
         const product = await Product.create(req.body);
         res.status(201).json(product);
-    } catch (error) {
+    } catch (error: any) {
         res.status(400).json({ message: error.message });
     }
 });
 
 // PUT update product (Admin only)
-router.put('/:id', protect, isAdmin, async (req, res) => {
+router.put('/:id', protect, isAdmin, async (req: Request, res: Response) => {
     try {
         const product = await Product.findById(req.params.id);
         if (product) {
@@ -49,13 +49,13 @@ router.put('/:id', protect, isAdmin, async (req, res) => {
         } else {
             res.status(404).json({ message: 'Product not found' });
         }
-    } catch (error) {
+    } catch (error: any) {
         res.status(400).json({ message: error.message });
     }
 });
 
 // DELETE product (Admin only)
-router.delete('/:id', protect, isAdmin, async (req, res) => {
+router.delete('/:id', protect, isAdmin, async (req: Request, res: Response) => {
     try {
         const product = await Product.findById(req.params.id);
         if (product) {
@@ -64,7 +64,7 @@ router.delete('/:id', protect, isAdmin, async (req, res) => {
         } else {
             res.status(404).json({ message: 'Product not found' });
         }
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
 });
