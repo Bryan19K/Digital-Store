@@ -12,17 +12,20 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
             token = req.headers.authorization.split(' ')[1];
+            // console.log('Token received:', token.substring(0, 10) + '...'); 
             const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
             req.user = await User.findById(decoded.id).select('-password');
-            next();
+            return next();
         } catch (error) {
-            console.error(error);
-            res.status(401).json({ message: 'Not authorized, token failed' });
+            console.error('Auth Error:', error);
+            return res.status(401).json({ message: 'Not authorized, token failed' });
         }
+    } else {
+        console.log('No Authorization header found or invalid format:', req.headers.authorization);
     }
 
     if (!token) {
-        res.status(401).json({ message: 'Not authorized, no token' });
+        return res.status(401).json({ message: 'Not authorized, no token' });
     }
 };
 

@@ -16,48 +16,54 @@ import Categories from './pages/admin/Categories';
 import AdminLogin from './pages/admin/Login';
 import Login from './pages/Login';
 import SuccessPage from './pages/SuccessPage';
+import SettingsTab from './pages/admin/SettingsTab';
 import ProtectedRoute from './components/ProtectedRoute';
+
+import { SettingsProvider } from './context/SettingsContext';
 
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
 
- 
+
   React.useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {!isAdminRoute && <Navbar />}
-      <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<MyAccount />} />
-          <Route path="/success" element={<SuccessPage />} />
+    <SettingsProvider>
+      <div className="min-h-screen bg-white flex flex-col">
+        {!isAdminRoute && <Navbar />}
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/profile" element={<MyAccount />} />
+            <Route path="/success" element={<SuccessPage />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
 
-          <Route element={<ProtectedRoute />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="products" element={<AdminDashboard />} />
-              <Route path="categories" element={<Categories />} />
-              <Route path="add" element={<AddProduct />} />
-              <Route path="edit/:id" element={<AddProduct />} />
-              <Route path="orders" element={<Orders />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="products" element={<AdminDashboard />} />
+                <Route path="categories" element={<Categories />} />
+                <Route path="add" element={<AddProduct />} />
+                <Route path="edit/:id" element={<AddProduct />} />
+                <Route path="orders" element={<Orders />} />
+                <Route path="settings" element={<SettingsTab />} />
+              </Route>
             </Route>
-          </Route>
-        </Routes>
-      </main>
-      {!isAdminRoute && <Footer />}
-    </div>
+          </Routes>
+        </main>
+        {!isAdminRoute && <Footer />}
+      </div>
+    </SettingsProvider>
   );
 }
 

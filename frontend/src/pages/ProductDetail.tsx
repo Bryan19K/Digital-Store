@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../store/useCartStore';
 import { useProductStore } from '../store/useProductStore';
 import { Plus, Minus, Truck, Shield, RotateCcw } from 'lucide-react';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 const ProductDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -59,30 +60,36 @@ const ProductDetail: React.FC = () => {
         <div className="bg-white min-h-screen pt-24 pb-12">
             <div className="container mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
-                  
+
                     <div className="space-y-4">
                         <div className="aspect-[3/4] bg-gray-100 overflow-hidden w-full">
                             {product.images && product.images.length > 0 ? (
                                 <img
-                                    src={product.images[0]}
+                                    src={getImageUrl(product.images[0])}
                                     alt={isEs ? (product.name?.es || '') : (product.name?.en || '')}
                                     className="w-full h-full object-cover object-center"
+                                    onError={handleImageError}
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
                             )}
                         </div>
-                        
+
                         <div className="grid grid-cols-4 gap-4">
                             {product.images?.map((img, idx) => (
                                 <div key={idx} className="aspect-square bg-gray-50 cursor-pointer border border-transparent hover:border-black transition-colors">
-                                    <img src={img} className="w-full h-full object-cover" alt={`Thumb ${idx}`} />
+                                    <img
+                                        src={getImageUrl(img)}
+                                        className="w-full h-full object-cover"
+                                        alt={`Thumb ${idx}`}
+                                        onError={handleImageError}
+                                    />
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                   
+
                     <div className="flex flex-col pt-4">
                         <div className="mb-8 border-b border-gray-100 pb-8">
                             <p className="text-sm text-gray-400 uppercase tracking-widest mb-2">
@@ -112,7 +119,7 @@ const ProductDetail: React.FC = () => {
                             </button>
                         </div>
 
-                        
+
                         <div className="grid grid-cols-1 gap-6 border-t border-gray-100 pt-8">
                             <div className="flex items-start space-x-4">
                                 <Truck size={20} strokeWidth={1.5} className="text-gray-400 mt-1" />

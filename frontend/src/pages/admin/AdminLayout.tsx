@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, LogOut, Tag, Menu, X, User, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Tag, Menu, X, User, ArrowLeft, Settings } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useSettings } from '../../context/SettingsContext';
 
 const AdminLayout: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
+    const { settings } = useSettings();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleLogout = () => {
@@ -32,6 +34,7 @@ const AdminLayout: React.FC = () => {
         { name: 'Products', path: '/admin/products', icon: Package, show: isAdmin },
         { name: 'Categories', path: '/admin/categories', icon: Tag, show: isAdmin },
         { name: 'Orders', path: '/admin/orders', icon: ShoppingCart, show: true },
+        { name: 'Settings', path: '/admin/settings', icon: Settings, show: isAdmin },
     ];
 
     const filteredNavItems = navItems.filter(item => item.show);
@@ -48,7 +51,7 @@ const AdminLayout: React.FC = () => {
                     <Menu size={24} />
                 </button>
                 <div className="ml-4 flex-1">
-                    <span className="text-lg font-serif font-bold text-brand-black">Digital Store</span>
+                    <span className="text-lg font-serif font-bold text-brand-black">{settings?.storeName || 'Digital Store'}</span>
                 </div>
             </header>
 
@@ -67,7 +70,7 @@ const AdminLayout: React.FC = () => {
             >
                 <div className="p-8 border-b border-gray-100 flex items-center justify-between">
                     <Link to="/" className="text-xl font-serif font-bold text-brand-black tracking-tight" onClick={closeMobileMenu}>
-                        Digital Store
+                        {settings?.storeName || 'Digital Store'}
                         <span className="block text-[10px] font-sans text-gray-400 font-medium uppercase tracking-widest mt-1">Admin Panel</span>
                     </Link>
                     <button

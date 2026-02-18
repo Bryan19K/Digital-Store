@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProductStore } from '../../store/useProductStore';
 import { useCategoryStore } from '../../store/useCategoryStore';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X } from 'lucide-react';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const AddProduct: React.FC = () => {
     const navigate = useNavigate();
@@ -18,10 +19,15 @@ const AddProduct: React.FC = () => {
         category: '',
         descriptionEn: '',
         descriptionEs: '',
-        imageUrl: '',
     });
 
+    // Separate state for image handling
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string>('');
+    const [existingImageUrl, setExistingImageUrl] = useState<string>('');
+
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchCategories();
@@ -37,8 +43,16 @@ const AddProduct: React.FC = () => {
                         : productToEdit.category?._id || '',
                     descriptionEn: productToEdit.description.en,
                     descriptionEs: productToEdit.description.es,
-                    imageUrl: productToEdit.images[0] || '',
                 });
+
+                // Handle existing image for preview
+                if (productToEdit.images && productToEdit.images.length > 0) {
+                    const img = productToEdit.images[0];
+                    setExistingImageUrl(img);
+
+                    // Use centralized utility for preview
+                    setPreviewUrl(getImageUrl(img));
+                }
             } else {
                 navigate('/admin'); // Product not found
             }
@@ -49,37 +63,86 @@ const AddProduct: React.FC = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImageFile(file);
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setImageFile(null);
+        setPreviewUrl('');
+        setExistingImageUrl('');
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
+        setError(null);
 
         // Validation
-        if (!formData.nameEn || !formData.price || !formData.category || !formData.imageUrl) {
-            setError('Please fill in all required fields (Name, Price, Category, Image).');
+        if (!formData.nameEn || !formData.price || !formData.category) {
+            setError('Please fill in all required fields (Name, Price, Category).');
+            setLoading(false);
+            return;
+        }
+
+        if (!isEditMode && !imageFile && !existingImageUrl) {
+            setError('Please upload an image for the new product.');
+            setLoading(false);
             return;
         }
 
         if (Number(formData.price) <= 0) {
             setError('Price must be a positive number.');
+            setLoading(false);
             return;
         }
 
-        const productData = {
-            name: { en: formData.nameEn, es: formData.nameEs || formData.nameEn },
-            description: { en: formData.descriptionEn, es: formData.descriptionEs || formData.descriptionEn },
-            price: Number(formData.price),
-            category: formData.category,
-            images: [formData.imageUrl],
-        };
+        try {
+            const data = new FormData();
+            data.append('nameEn', formData.nameEn);
+            data.append('nameEs', formData.nameEs || formData.nameEn);
+            data.append('price', formData.price);
+            data.append('category', formData.category);
+            data.append('descriptionEn', formData.descriptionEn);
+            data.append('descriptionEs', formData.descriptionEs || formData.descriptionEn);
 
-        if (isEditMode && id) {
-            updateProduct(id, productData);
-            alert('Product updated successfully!');
-        } else {
-            addProduct(productData);
-            alert('Product added successfully!');
+            if (imageFile) {
+                data.append('image', imageFile);
+            } else if (existingImageUrl) {
+                // If checking an existing product and no new file, we might want to preserve the old one
+                // The backend logic handles this if we don't send anything, or we can send the string
+                data.append('imageUrl', existingImageUrl);
+            }
+
+            let success = false;
+
+            if (isEditMode && id) {
+                success = await updateProduct(id, data);
+            } else {
+                success = await addProduct(data);
+            }
+
+            if (success) {
+                alert(isEditMode ? 'Product updated successfully!' : 'Product added successfully!');
+                navigate('/admin');
+            } else {
+                setError('Failed to save product. Please try again.');
+            }
+        } catch (err) {
+            console.error(err);
+            setError('An error occurred.');
+        } finally {
+            setLoading(false);
         }
-
-        navigate('/admin');
     };
 
     return (
@@ -158,16 +221,37 @@ const AddProduct: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Image Upload Area */}
                 <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-gray-500 font-semibold block">Image URL *</label>
-                    <input
-                        type="url"
-                        name="imageUrl"
-                        value={formData.imageUrl}
-                        onChange={handleChange}
-                        className="w-full border border-gray-200 p-3 text-sm focus:outline-none focus:border-brand-black transition-colors"
-                        placeholder="https://example.com/image.jpg"
-                    />
+                    <label className="text-xs uppercase tracking-widest text-gray-500 font-semibold block">Product Image *</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors relative">
+
+                        {previewUrl ? (
+                            <div className="relative w-full max-w-sm">
+                                <img src={previewUrl} alt="Preview" className="w-full h-64 object-cover rounded-md shadow-sm" />
+                                <button
+                                    type="button"
+                                    onClick={removeImage}
+                                    className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md hover:bg-red-50 text-gray-500 hover:text-red-500 transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                        ) : (
+                            <label className="cursor-pointer w-full h-full flex flex-col items-center justify-center">
+                                <Upload size={40} className="text-gray-400 mb-4" />
+                                <span className="text-sm font-medium text-gray-700">Click to upload image</span>
+                                <span className="text-xs text-gray-500 mt-1">JPG, PNG, WebP (Max 5MB)</span>
+                                <input
+                                    type="file"
+                                    name="image"
+                                    onChange={handleFileChange}
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="hidden"
+                                />
+                            </label>
+                        )}
+                    </div>
                 </div>
 
                 <div className="space-y-2">
@@ -184,10 +268,17 @@ const AddProduct: React.FC = () => {
                 <div className="pt-6">
                     <button
                         type="submit"
-                        className="w-full bg-brand-black text-white py-4 uppercase tracking-widest font-medium text-sm hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2"
+                        disabled={loading}
+                        className="w-full bg-brand-black text-white py-4 uppercase tracking-widest font-medium text-sm hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
-                        <Save size={18} />
-                        <span>{isEditMode ? 'Update Product' : 'Save Product'}</span>
+                        {loading ? (
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        ) : (
+                            <>
+                                <Save size={18} />
+                                <span>{isEditMode ? 'Update Product' : 'Save Product'}</span>
+                            </>
+                        )}
                     </button>
                 </div>
 

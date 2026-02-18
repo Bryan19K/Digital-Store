@@ -7,13 +7,13 @@ interface ProductState {
     loading: boolean;
     error: string | null;
     fetchProducts: () => Promise<void>;
-    addProduct: (product: FormData) => Promise<boolean>; 
-    updateProduct: (id: string, product: Partial<Product>) => Promise<boolean>;
+    addProduct: (product: any) => Promise<boolean>;
+    updateProduct: (id: string, product: any) => Promise<boolean>;
     deleteProduct: (id: string) => Promise<boolean>;
 }
 
 export const useProductStore = create<ProductState>((set, get) => ({
-    products: [], 
+    products: [],
     loading: false,
     error: null,
 
@@ -31,8 +31,19 @@ export const useProductStore = create<ProductState>((set, get) => ({
     addProduct: async (productData) => {
         set({ loading: true });
         try {
-            
-            const response = await api.post('/products', productData);
+            // Manually get token to ensure it's included with multipart/form-data
+            const token = localStorage.getItem('auth-storage')
+                ? JSON.parse(localStorage.getItem('auth-storage')!).state?.user?.token
+                : null;
+
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+            };
+
+            const response = await api.post('/products', productData, config);
             set(state => ({
                 products: [...state.products, response.data],
                 loading: false
@@ -48,7 +59,17 @@ export const useProductStore = create<ProductState>((set, get) => ({
     updateProduct: async (id, updatedData) => {
         set({ loading: true });
         try {
-            const response = await api.put(`/products/${id}`, updatedData);
+            const token = localStorage.getItem('auth-storage')
+                ? JSON.parse(localStorage.getItem('auth-storage')!).state?.user?.token
+                : null;
+
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+            };
+            const response = await api.put(`/products/${id}`, updatedData, config);
             set(state => ({
                 products: state.products.map(p => p._id === id ? response.data : p),
                 loading: false

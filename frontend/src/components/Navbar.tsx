@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../store/useCartStore';
 import { useAuthStore } from '../store/useAuthStore';
 import LanguageSelector from './LanguageSelector';
+import { useSettings } from '../context/SettingsContext';
 
 const Navbar: React.FC = () => {
     const { t } = useTranslation();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { settings } = useSettings();
     const cart = useCartStore((state) => state.cart);
     const { user, isAuthenticated } = useAuthStore();
     const navigate = useNavigate();
@@ -63,7 +65,7 @@ const Navbar: React.FC = () => {
 
                     {/* Logo */}
                     <Link to="/" className="text-2xl font-serif font-bold tracking-tight text-brand-black">
-                        Digital Store
+                        {settings.storeName}
                     </Link>
 
                     {/* Desktop Links */}

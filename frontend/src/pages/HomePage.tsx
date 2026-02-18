@@ -1,21 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProductStore } from '../store/useProductStore';
 import { useCategoryStore } from '../store/useCategoryStore';
 import ProductCard from '../components/ProductCard';
+import { useSettings } from '../context/SettingsContext';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 const HomePage: React.FC = () => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { products } = useProductStore();
     const { categories } = useCategoryStore();
+    const { settings } = useSettings();
 
     // Featured products
     const featuredProducts = products.slice(0, 4);
 
     const handleCategoryClick = (slug: string) => {
         navigate(`/shop?category=${slug}`);
+    };
+
+    // Construct simplified hero image URL (context already provides path)
+    const getHeroImageUrl = () => {
+        if (!settings.heroImage) return 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2670&auto=format&fit=crop';
+
+        if (settings.heroImage.startsWith('http')) return settings.heroImage;
+
+        // Use centralized image utility for uploaded images
+        return getImageUrl(settings.heroImage);
     };
 
     return (
@@ -25,7 +38,7 @@ const HomePage: React.FC = () => {
                 {/* Background Image with Slow Zoom Effect */}
                 <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat animate-slow-zoom"
-                    style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2670&auto=format&fit=crop")', filter: 'brightness(0.7)' }}
+                    style={{ backgroundImage: `url("${getHeroImageUrl()}")`, filter: 'brightness(0.7)' }}
                 />
 
                 {/* Hero Content */}

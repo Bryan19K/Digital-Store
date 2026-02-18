@@ -10,7 +10,7 @@ api.interceptors.request.use(
     (config) => {
         // Token
         const token = localStorage.getItem('auth-storage')
-            ? JSON.parse(localStorage.getItem('auth-storage')!).state?.token
+            ? JSON.parse(localStorage.getItem('auth-storage')!).state?.user?.token
             : null;
 
         if (token) {

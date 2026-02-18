@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../store/useCartStore';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 import { Product } from '../types/Product';
 
@@ -21,13 +22,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {/* Image Container */}
             <Link to={`/product/${product._id}`} className="block relative aspect-[3/4] overflow-hidden bg-gray-100">
                 <img
-                    src={product.images?.[0] || ''}
+                    src={getImageUrl(product.images?.[0])}
                     alt={isEs ? (product.name?.es || '') : (product.name?.en || '')}
                     className={`h-full w-full object-cover object-center transition-transform duration-700 ease-in-out ${isHovered ? 'scale-110' : 'scale-100'
                         }`}
+                    onError={handleImageError}
                 />
 
                 {/* Category Badge */}

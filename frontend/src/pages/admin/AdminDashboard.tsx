@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Trash2, Edit, Plus } from 'lucide-react';
 import { useProductStore } from '../../store/useProductStore';
 import { useOrderStore } from '../../store/useOrderStore';
+import { getImageUrl, handleImageError } from '../../utils/imageUtils';
 
 const AdminDashboard: React.FC = () => {
     const { products, deleteProduct, fetchProducts } = useProductStore();
@@ -95,9 +96,10 @@ const AdminDashboard: React.FC = () => {
                                     <td className="p-4 flex items-center space-x-4">
                                         <div className="h-12 w-12 bg-gray-100 overflow-hidden rounded-sm">
                                             <img
-                                                src={product.images[0]}
+                                                src={getImageUrl(product.images[0])}
                                                 alt={isEs ? product.name.es : product.name.en}
                                                 className="h-full w-full object-cover"
+                                                onError={handleImageError}
                                             />
                                         </div>
                                         <span className="font-medium text-brand-black text-sm">
